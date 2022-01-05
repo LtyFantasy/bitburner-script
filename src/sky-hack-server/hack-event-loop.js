@@ -1,124 +1,13 @@
-
-/**
- * version: 1.0.0
- * 本文件是Hack核心脚本
- * 
- * 手动，使用方法： 
- * 1，scp hack-server.ns [目标服务器]				----- 复制本脚本到部署服务器上
- * 2，connect [目标服务器]							----- 然后连接到部署服务器
- * 3，run hack-server.ns --name [被hack服务器]		----- 在部署服务器上启动脚本，并开始hack目标服务器
- * 
- * 本脚本的运行，需要确保home还存在如下三个脚本
- */
-const weakenScript = "do-weaken.ns";
-const growScript = "do-grow.ns";
-const hackScript = "do-hack.ns";
-
 /** @param {NS} ns **/
 export async function main(ns) {
 
-	const params = ns.flags([
-		// 服务器名
-		['name', ''],
-		// 延迟附加值，默认200ms
-		['delay', 200]
-	]);
-
-	const { name, delay } = params;
-
-	ns.disableLog("ALL");
-	// 验证服务器是否存在
-	if (!verifyServer(ns, name)) return;
-	// 判断服务器是否可以root	
-	const server = ns.getServer(name);
-	if (!canHackServer(ns, server)) return;
-	rootServer(ns, server);
-	// 清空所有脚本
-	ns.killall(server.hostname);
-	await ns.sleep(1000);
-	// 复制执行脚本到目标服务器
-	await copyScriptToHostServer(ns);
-	// 开始循环任务
-	await hackEventLoop(ns, server, delay);
-}
-
-// 命令行 自动补全
-export function autocomplete(data, args) {
-	return [...data.servers, ...data.scripts];
-}
-
-/**
-   * 验证服务器是否存在
-   * @param {NS} ns
-   * @param {string} name
-   */
-function verifyServer(ns, name) {
-	if (!ns.serverExists(name)) {
-		ns.print(`服务器${name}不存在`);
-		return false;
-	}
-	return true;
-}
-
-/** 
-   * 检查当前破解工具个数
-   * @param {NS} ns
-   **/
-function getCurrentPortTools(ns) {
-	var tools = 0;
-	if (ns.fileExists("BruteSSH.exe", "home")) tools++;
-	if (ns.fileExists("FTPCrack.exe", "home")) tools++;
-	if (ns.fileExists("relaySMTP.exe", "home")) tools++;
-	if (ns.fileExists("HTTPWorm.exe", "home")) tools++;
-	if (ns.fileExists("SQLInject.exe", "home")) tools++;
-	return tools;
-}
-
-/** 
-   * 使用破解工具
-   * @param {NS} ns 
-   * @param {Server} server 
-   **/
-function rootServer(ns, server) {
-	// 已经root
-	if (server.hasAdminRights) return;
-	if (!server.sshPortOpen && ns.fileExists("BruteSSH.exe", "home")) ns.brutessh(server.hostname);
-	if (!server.ftpPortOpen && ns.fileExists("FTPCrack.exe", "home")) ns.ftpcrack(server.hostname);
-	if (!server.smtpPortOpen && ns.fileExists("relaySMTP.exe", "home")) ns.relaysmtp(server.hostname);
-	if (!server.httpPortOpen && ns.fileExists("HTTPWorm.exe", "home")) ns.httpworm(server.hostname);
-	if (!server.sqlPortOpen && ns.fileExists("SQLInject.exe", "home")) ns.sqlinject(server.hostname);
-	ns.nuke(server.hostname);
-}
-
-/** 
-   * 判断服务器是否可以Hack
-   * @param {NS} ns
-   * @param {Server} server 
-   **/
-function canHackServer(ns, server) {
-
-	// 服务器属于自己的
-	if (server.purchasedByPlayer) {
-		ns.print(`${server.hostname}属于自己的服务器，不能Hack`);
-		return false;
-	}
-
-	// 检查hack等级
-	const hackLvl = ns.getHackingLevel();
-	const targetHackLvl = server.requiredHackingSkill;
-	if (targetHackLvl > hackLvl) {
-		ns.print(`${server.hostname} 需求Hack等级${targetHackLvl} 大于当前 ${hackLvl}`);
-		return false;
-	}
-
-	// 检查端口需求
-	const tools = getCurrentPortTools(ns);
-	const targetPorts = server.numOpenPortsRequired;
-	if (targetPorts > tools) {
-		ns.print(`${server.hostname} 需求Port${targetPorts} 大于工具个数 ${tools}`);
-		return false;
-	}
-	return true;
+	const name = ns.args[0];
+	const delay = ns.args[1];
+	const hackScript = ns.args[2];
+	const growScript = ns.args[3];
+	const weakenScript = ns.args[4];
+	
+	await hackEventLoop(ns, name, delay, hackScript, growScript, weakenScript);
 }
 
 /**
@@ -132,13 +21,13 @@ function analyzeServer(ns, server) {
 	const hackPercent = ns.hackAnalyze(server.hostname);
 	ns.print(`HackPercent: ${hackPercent * 100} %`);
 
-	// hack成功率
-	const hackChance = ns.hackAnalyzeChance(server.hostname);
-	ns.print(`HackChance: ${hackChance * 100} %`);
+	// // hack成功率
+	// const hackChance = ns.hackAnalyzeChance(server.hostname);
+	// ns.print(`HackChance: ${hackChance * 100} %`);
 
 	// hack导致的安全值上升
-	const hackSecurityGrow = ns.hackAnalyzeSecurity(1);
-	ns.print(`HackSecurityGrow: ${hackSecurityGrow}`);
+	// const hackSecurityGrow = ns.hackAnalyzeSecurity(1);
+	// ns.print(`HackSecurityGrow: ${hackSecurityGrow}`);
 
 	// 当前Hack时间
 	const hackTime = ns.getHackTime(server.hostname);
@@ -152,13 +41,13 @@ function analyzeServer(ns, server) {
 	const weakenTime = ns.getWeakenTime(server.hostname);
 	ns.print(`WeakenTime: ${weakenTime / 1000} s`);
 
-	// 单个Thread一次grow
-	const growPercent = ns.getServerGrowth(server.hostname);
-	ns.print(`GrowPercent: ${growPercent / 100} %`);
+	// // 单个Thread一次grow
+	// const growPercent = ns.getServerGrowth(server.hostname);
+	// ns.print(`GrowPercent: ${growPercent / 100} %`);
 
-	// grow导致的安全值上升
-	const growSecurityGrow = ns.growthAnalyzeSecurity(1);
-	ns.print(`GrowSecurityGrow: ${growSecurityGrow}`);
+	// // grow导致的安全值上升
+	// const growSecurityGrow = ns.growthAnalyzeSecurity(1);
+	// ns.print(`GrowSecurityGrow: ${growSecurityGrow}`);
 
 	// grow时间
 	const growTime = ns.getGrowTime(server.hostname);
@@ -166,42 +55,32 @@ function analyzeServer(ns, server) {
 
 	return {
 		hackPercent,
-		hackChance,
-		hackSecurityGrow,
+		// hackChance,
+		// hackSecurityGrow,
 		hackTime,
 		weakenValue,
 		weakenTime,
-		growPercent,
-		growSecurityGrow,
+		//growPercent,
+		// growSecurityGrow,
 		growTime
 	};
 }
 
 /**
-   * 复制执行脚本到部署服务器
-   * @param {NS} ns
-   */
-async function copyScriptToHostServer(ns) {
-
-	const hostName = ns.getHostname();
-	if (hostName === 'home') return;
-	await ns.scp(
-		[weakenScript, growScript, hackScript],
-		"home",
-		hostName
-	);
-}
-
-/**
    * Hack事件循环
    * @param {NS} ns
-   * @param {Server} server
+   * @param {string} name
    * @param {number} delayInterval
+   * @param {string} hackScript
+   * @param {string} growScript
+   * @param {string} weakenScript
    */
-async function hackEventLoop(ns, server, delayInterval) {
+async function hackEventLoop(ns, name, delayInterval, hackScript, growScript, weakenScript) {
 
 	// 部署服务器
 	const hostServer = ns.getServer();
+	// 被Hack服务器
+	const server = ns.getServer(name);
 
 	// 目标服务器当前情况
 	const moneyMax = ns.getServerMaxMoney(server.hostname);
@@ -244,7 +123,7 @@ async function hackEventLoop(ns, server, delayInterval) {
 			growThread = Math.floor(ns.growthAnalyze(server.hostname, moneyThreshold / money));
 			moneyTarget = moneyThreshold;
 		}
-		ns.print(`【${count}】Hack金额目标(${formatMoney(moneyTarget)})`);
+		ns.print(`【${count}】Hack金额目标(${Format.money(moneyTarget)})`);
 
 		// 计算Hack所需线程
 		var hackThread = Math.ceil(1 / analyze.hackPercent);
@@ -253,7 +132,7 @@ async function hackEventLoop(ns, server, delayInterval) {
 			hackThread = 1000;
 		}
 
-		ns.print(`【${count}】初步计算\nWeaken(t=${weakenThread}), 安全(${security.toFixed(2)}), 阈值(${securityThreshold.toFixed(2)})\nGrow(t=${growThread}), 当前(${formatMoney(money)}), 阈值(${(formatMoney(moneyThreshold))}),\nHack(t=${hackThread})`);
+		ns.print(`【${count}】初步计算\nWeaken(t=${weakenThread}), 安全(${security.toFixed(2)}), 阈值(${securityThreshold.toFixed(2)})\nGrow(t=${growThread}), 当前(${Format.money(money)}), 阈值(${(Format.money(moneyThreshold))}),\nHack(t=${hackThread})`);
 		// 判断Ram占用是否超出上限
 		let freeRam = hostServer.maxRam - ns.getServerUsedRam(hostServer.hostname);
 		var totalNeedRam = 0;
@@ -263,10 +142,11 @@ async function hackEventLoop(ns, server, delayInterval) {
 			let growNeedRam = growThread * growRam;
 			let hackNeedRam = hackThread * hackRam;
 			totalNeedRam = weakenNeedRam + growNeedRam + hackNeedRam;
+			ns.print(`【${count}】需要(${totalNeedRam.toFixed(2)} GB)，`);
 
 			// 削减线程数
 			if (totalNeedRam > freeRam) {
-				ns.print(`【${count}】内存超额，需要(${totalNeedRam.toFixed(2)} GB)，剩余(${freeRam.toFixed(2)} GB)，开始削减`);
+				ns.print(`【${count}】内存超额，剩余(${freeRam.toFixed(2)} GB)，开始削减`);
 				var deltaRam = totalNeedRam - freeRam;
 				// 优先削减　hack > grow > weakem
 				let hackDelta = Math.min(hackNeedRam, deltaRam);
@@ -334,25 +214,5 @@ async function hackEventLoop(ns, server, delayInterval) {
 		let totalTime = Math.max(weakenTime, growTime, hackTime) + 1000;
 		ns.print(`【${count}】开始执行脚本，预计需要${(totalTime / 1000).toFixed(3)} s`);
 		await ns.sleep(totalTime);
-	}
-}
-
-// 金额格式化
-function formatMoney(money) {
-
-	if (money >= 1e12) {
-		return `${(money / 1e12).toFixed(2)} t`;
-	}
-	else if (money >= 1e9) {
-		return `${(money / 1e9).toFixed(2)} b`;
-	}
-	else if (money >= 1e6) {
-		return `${(money / 1e6).toFixed(2)} m`;
-	}
-	else if (money >= 1000) {
-		return `${(money / 1000).toFixed(2)} k`;
-	}
-	else {
-		return `${money}`;
 	}
 }
