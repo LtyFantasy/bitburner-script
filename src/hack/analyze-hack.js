@@ -3,15 +3,15 @@
 /**
  * version: 1.0.0
  * 本文件是Hack启动脚本，负责检查服务器基本情况
- * 确认可以Hack后，会启动hack-event-loop.js，进入任务循环
+ * 确认可以Hack后，会启动hack-loop.js，进入任务循环
  */
 
 /**
- * hack-server.js hack-event-loop.js do-weaken.js do-grow.js do-hack.js 
+ * analyze-hack.js hack-loop.js do-weaken.js do-grow.js do-hack.js 
  * 这5个脚本都应该在home的sky-hack-server文件夹下
  */
-const folder = "/sky-hack-server";
-const loopScript = `${folder}/hack-event-loop.js`;
+const folder = "/hack";
+const loopScript = `${folder}/hack-loop.js`;
 const weakenScript = `${folder}/do-weaken.js`;
 const growScript = `${folder}/do-grow.js`;
 const hackScript = `${folder}/do-hack.js`;

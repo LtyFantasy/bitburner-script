@@ -17,16 +17,17 @@ const setupConfig = {
     {
       enable: false,
       name: "巡天系统",
-      folder: "sky-system",
+      folder: "system",
       files: []
     },
     {
       enable: true,
-      name: '动态Hack模块',
-      folder: "sky-hack-server",
+      name: 'Hack模块',
+      folder: "hack",
       files: [
-        "hack-server.js",
-        "hack-event-loop.js",
+        "normal-hack.js",
+        "analyze-hack.js",
+        "hack-loop.js",
         "do-hack.js",
         "do-grow.js",
         "do-weaken.js"
@@ -35,8 +36,10 @@ const setupConfig = {
     {
       enable: false,
       name: "工具集",
-      folder: "sky-tools",
-      files: []
+      folder: "tools",
+      files: [
+        "scan-deploy.js"
+      ]
     },
   ],
 };
@@ -44,14 +47,20 @@ const setupConfig = {
 /** @param {NS} ns **/
 export async function main(ns) {
 
+  const log = createLogger(ns, "巡天系统");
   if (ns.getHostname !== 'home') {
     throw "⚠ 脚本只能从home执行";
   }
 
   const success = await downloadFiles(ns);
   if (!success) {
-    ns.tprintf();
+    log("下载脚本文件失败，请检查网络环境，稍候重试");
+    return;
   }
+
+  log(logo);
+  log("巡天系统安装完毕，欢迎使用本系列脚本~");
+  log("未来，完整版巡天系统会附带UI操作界面，敬请期待");
 }
 
 /**
