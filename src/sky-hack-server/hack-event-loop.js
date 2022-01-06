@@ -6,7 +6,8 @@ export async function main(ns) {
 	const hackScript = ns.args[2];
 	const growScript = ns.args[3];
 	const weakenScript = ns.args[4];
-	
+
+	ns.disableLog("ALL");
 	await hackEventLoop(ns, name, delay, hackScript, growScript, weakenScript);
 }
 
@@ -123,7 +124,7 @@ async function hackEventLoop(ns, name, delayInterval, hackScript, growScript, we
 			growThread = Math.floor(ns.growthAnalyze(server.hostname, moneyThreshold / money));
 			moneyTarget = moneyThreshold;
 		}
-		ns.print(`【${count}】Hack金额目标(${Format.money(moneyTarget)})`);
+		ns.print(`【${count}】Hack金额目标(${formatMoney(moneyTarget)})`);
 
 		// 计算Hack所需线程
 		var hackThread = Math.ceil(1 / analyze.hackPercent);
@@ -132,7 +133,7 @@ async function hackEventLoop(ns, name, delayInterval, hackScript, growScript, we
 			hackThread = 1000;
 		}
 
-		ns.print(`【${count}】初步计算\nWeaken(t=${weakenThread}), 安全(${security.toFixed(2)}), 阈值(${securityThreshold.toFixed(2)})\nGrow(t=${growThread}), 当前(${Format.money(money)}), 阈值(${(Format.money(moneyThreshold))}),\nHack(t=${hackThread})`);
+		ns.print(`【${count}】初步计算\nWeaken(t=${weakenThread}), 安全(${security.toFixed(2)}), 阈值(${securityThreshold.toFixed(2)})\nGrow(t=${growThread}), 当前(${formatMoney(money)}), 阈值(${(formatMoney(moneyThreshold))}),\nHack(t=${hackThread})`);
 		// 判断Ram占用是否超出上限
 		let freeRam = hostServer.maxRam - ns.getServerUsedRam(hostServer.hostname);
 		var totalNeedRam = 0;
@@ -214,5 +215,26 @@ async function hackEventLoop(ns, name, delayInterval, hackScript, growScript, we
 		let totalTime = Math.max(weakenTime, growTime, hackTime) + 1000;
 		ns.print(`【${count}】开始执行脚本，预计需要${(totalTime / 1000).toFixed(3)} s`);
 		await ns.sleep(totalTime);
+	}
+}
+
+/**
+ * 金额格式化
+ */
+function formatMoney(money) {
+	if (money >= 1e12) {
+		return `${(money / 1e12).toFixed(2)} t`;
+	}
+	else if (money >= 1e9) {
+		return `${(money / 1e9).toFixed(2)} b`;
+	}
+	else if (money >= 1e6) {
+		return `${(money / 1e6).toFixed(2)} m`;
+	}
+	else if (money >= 1000) {
+		return `${(money / 1000).toFixed(2)} k`;
+	}
+	else {
+		return `${money}`;
 	}
 }
