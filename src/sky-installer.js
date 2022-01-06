@@ -25,7 +25,9 @@ const setupConfig = {
       name: 'Hack模块',
       folder: "hack",
       files: [
+        // 普通串行Hack脚本
         "normal-hack.js",
+        // 动态Hack系列脚本
         "analyze-hack.js",
         "hack-loop.js",
         "do-hack.js",
@@ -34,11 +36,16 @@ const setupConfig = {
       ]
     },
     {
-      enable: false,
+      enable: true,
       name: "工具集",
       folder: "tools",
       files: [
-        "scan-deploy.js"
+        // 购买服务器
+        "buy-server.js",
+        // 快速执行动态Hack
+        "run-analyze-hack.js",
+        // 扫描并批量部署Normal Hack
+        "scan-deploy-normal-hack.js"
       ]
     },
   ],
@@ -48,7 +55,7 @@ const setupConfig = {
 export async function main(ns) {
 
   const log = createLogger(ns, "巡天系统");
-  if (ns.getHostname !== 'home') {
+  if (ns.getHostname() !== 'home') {
     throw "⚠ 脚本只能从home执行";
   }
 
@@ -89,23 +96,32 @@ async function downloadFiles(ns) {
     }
   }
 
-  while(count != list.length && retry < 3); {
-    
-    retry > 0 && log(`下载重试，第${retry}次`);
-    for (const file of list.length) {
-      log(`开始下载模块(${file.module})，下属文件(${file.path})，[${count} / ${list.length}]`);
+  log(`总计${list.length}个文件需要下载`);
+  do {
+    retry > 0 && log(`下载重试，第${retry+1}次`);
+    for (const file of list) {
+
+      if (file.success) continue;
+
+      log(`开始下载模块(${file.module})，下属文件(${file.path})，[${count+1} / ${list.length}]`);
       const success = await ns.wget(file.url, file.path);
       if (success) {
-        log(`😡 文件${file.path}下载失败`);
+        log(`😁 文件${file.path}下载成功`);
         count++;
+        file.success = true;
       }
       else {
-        log(`😁 文件${file.path}下载成功`);
+        log(`😡 文件${file.path}下载失败`);
       }
     }
 
-    retry++;
-  }
+    // 下载完成
+    if (count === list.length) break;
+    // 重试仍然失败
+    if (++retry >= 3) break;
+    await ns.sleep(1000);
+  } while(count != list.length);
+
   return count === list.length;
 }
 

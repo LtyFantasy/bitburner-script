@@ -1,6 +1,6 @@
 
 // 自动部署的Hack脚本
-const scriptName = "normal-hack.ns";
+const scriptName = "/hack/normal-hack.js";
 
 /** @param {NS} ns **/
 export async function main(ns) {
@@ -61,10 +61,10 @@ async function scanServer(ns, name, exclude) {
 			if (can) {
 				runHackTools(ns, server);
 				if (server.moneyMax === 0) {
-					ns.tprint(`服务器${server.hostname}，最大金额为0，没有hack价值`);
+					ns.tprint(`${server.hostname}，最大金额为0，没有hack价值`);
 				}
 				else {
-					ns.tprint(`服务器${server.hostname}，最大金额${formatMoney(server.moneyMax)}`);
+					ns.tprint(`${server.hostname}，最大金额${formatMoney(server.moneyMax)}`);
 					await hackServer(ns, server)
 				}
 			}
@@ -119,7 +119,7 @@ async function hackServer(ns, server) {
 	const free = server.maxRam - server.ramUsed;
 	const thread = parseInt((free / needRam).toString());
 	if (thread > 0) {
-		ns.tprint("能部署线程：", thread);
+		ns.tprint(`${targetName}能部署线程：${thread}个`);
 		await ns.scp(scriptName, 'home', targetName);
 		ns.exec(scriptName, targetName, thread, server.hostname);
 	}

@@ -41,7 +41,9 @@ export async function main(ns) {
 	await ns.sleep(1000);
 	// 复制执行脚本到目标服务器
 	await copyScriptToHostServer(ns);
+	ns.tprint(`-----------------------------------------------`);
 	ns.tprint(`开启Hack循环任务，目标(${name})，预计10秒钟后启动`);
+	ns.tprint(`-----------------------------------------------`);
 	// 开始循环任务，系统规定，spawn需要等待大约10秒才会启动新脚本
 	ns.spawn(loopScript, 1, name, delay, hackScript, growScript, weakenScript);
 }
