@@ -11,14 +11,16 @@ const logo = `
 const setupConfig = {
   // 代码源地址
   github:
-    "https://raw.githubusercontent.com/LtyFantasy/bitburner-script/main/src",
+    "https://raw.githubusercontent.com/LtyFantasy/bitburner-script/dev/src",
   // 模块配置，后续在这里追加其他模块配置
   modules: [
     {
       enable: false,
       name: "巡天系统",
       folder: "system",
-      files: []
+      files: [
+        
+      ]
     },
     {
       enable: true,

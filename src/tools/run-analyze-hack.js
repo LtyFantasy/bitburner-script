@@ -20,3 +20,8 @@ export async function main(ns) {
 	await ns.scp(analyzeHackScript, 'home', deployName);
 	ns.exec(analyzeHackScript, deployName, 1, "--name", serverName);
 }
+
+// 命令行 自动补全
+export function autocomplete(data, args) {
+	return [...data.servers];
+}
