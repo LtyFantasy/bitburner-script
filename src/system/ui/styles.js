@@ -3,8 +3,9 @@
  * 注入全局样式
  * 
  * @param {Document} doc
+ * @param {UserInterfaceTheme} theme 
  */
-export function injectStyle(doc) {
+export function injectStyle(doc, theme) {
 
     const style = `
           <style type="text/css" id="sky-style">

@@ -1,4 +1,3 @@
-
 /** @param {NS} ns **/
 export async function main(ns) {
 
@@ -103,7 +102,7 @@ async function hackEventLoop(ns, name, delayInterval, hackScript, growScript, we
 		count++;
 		// 计算本轮循环，服务器状况
 		const analyze = analyzeServer(ns, server);
-		var money = ns.getServerMoneyAvailable(server.hostname);
+		const money = Math.max(ns.getServerMoneyAvailable(server.hostname), 1);
 		const security = ns.getServerSecurityLevel(server.hostname);
 
 		// 计算本次需要进行的任务
@@ -120,7 +119,6 @@ async function hackEventLoop(ns, name, delayInterval, hackScript, growScript, we
 		var growThread = 0;
 		var moneyTarget = money;
 		if (needGrow) {
-			if (money <= 0) money = 1;
 			ns.print(`【${count}】目标金额增长比例(${(moneyThreshold / money).toFixed(3)})`);
 			growThread = Math.floor(ns.growthAnalyze(server.hostname, moneyThreshold / money));
 			moneyTarget = moneyThreshold;
@@ -216,6 +214,9 @@ async function hackEventLoop(ns, name, delayInterval, hackScript, growScript, we
 		let totalTime = Math.max(weakenTime, growTime, hackTime) + 1000;
 		ns.print(`【${count}】开始执行脚本，预计需要${(totalTime / 1000).toFixed(3)} s`);
 		await ns.sleep(totalTime);
+
+		const curMoney = ns.getServerMoneyAvailable(server.hostname);
+		ns.print(`【${count}】本轮获取金额：${formatMoney(curMoney - money)}`);
 	}
 }
 

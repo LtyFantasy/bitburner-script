@@ -1,4 +1,6 @@
-import { injectStyle } from "./sky-styles";
+import "/system/jquery-3.6.0.min.js";
+import { injectStyle } from "/system/ui/styles";
+import { createMenu } from "/system/ui/menu";
 
 const iconServer = `
   <svg t="1641088564439" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2336" width="20" height="20">
@@ -42,31 +44,29 @@ let root = doc.getElementById("root");
 
 // UI配置
 const uiConfig = {
-  id: {
-    // 菜单入口
-    menuEntrance: "sky-menu-entrance",
-    // 菜单 - 统计
-    meunStatistics: "sky-menu-statistics",
-    // 菜单 - 扫描
-    menuScan: "sky-menu-scan",
-    // 菜单 - 部署
-    menuDeploy: "sky-menu-deploy",
-    // 面板 - 扫描
-    panelScan: 'sky-panel-scan',
-  }
+    id: {
+        // 菜单入口
+        menuEntrance: "sky-menu-entrance",
+        // 菜单 - 统计
+        meunStatistics: "sky-menu-statistics",
+        // 菜单 - 扫描
+        menuScan: "sky-menu-scan",
+        // 菜单 - 部署
+        menuDeploy: "sky-menu-deploy",
+        // 面板 - 扫描
+        panelScan: 'sky-panel-scan'
+    }
 };
 
 // 事件系统
-const eventSystem = {
-  // 事件标记
-  flasg: {
-    // 需要扫描
-    needScan: false,
-  },
-  // 事件处理器
-  scheduler: {},
-  // 事件队列
-  queue: new Array(),
+const eventSystem = { // 事件标记
+    flasg: { // 需要扫描
+        needScan: false
+    },
+    // 事件处理器
+    scheduler: {},
+    // 事件队列
+    queue: new Array()
 };
 
 // ------------------------------------------------------------------------------------------
@@ -76,74 +76,77 @@ const eventSystem = {
 /** @param {NS} netScript **/
 export async function main(netScript) {
 
-  ns = netScript;
-  ns.disableLog("ALL");
-  const host = ns.getHostname();
-  if (host !== "home") {
-    throw "只能从home运行该脚本";
-  }
+    ns = netScript;
+    ns.disableLog("ALL");
+    const host = ns.getHostname();
+    if (host !== "home") {
+        throw "只能从home运行该脚本";
+    }
 
-  theme = ns.ui.getTheme();
-  // 注入style，创建入口菜单
-  injectStyle(doc);
-  createMenu();
-  // 事件初始化
-  eventRegister();
+    theme = ns.ui.getTheme();
+    // 注入style，创建入口菜单
+    injectStyle(doc, theme);
+    createMenu(theme);
+    // 事件初始化
+    eventRegister();
 
-  while (true) {
-    await ns.sleep(200);
-    eventLoop();
-  }
+    while (true) {
+        await ns.sleep(200);
+        eventLoop();
+    }
 }
 
 // ------------------------------------------------------------------------------------------
 // ------------------------------------------ 界面 ------------------------------------------
 // ------------------------------------------------------------------------------------------
 
-/**
- * 创建左侧菜单入口
- */
-function createMenu() {
+// /**
+//  * 创建左侧菜单入口
+//  */
+// function createMenu() { // 检查入口是否存在，存在则销毁
 
-  // 检查入口是否存在，存在则销毁
-  deleteNodeById(uiConfig.id.menuEntrance)
+//     $(`#${uiConfig.id.menuEntrance}`).remove();
 
-  // 注入菜单
-  var list = doc.getElementsByClassName("MuiList-root");
-  const mainMeun = list[0];
-  mainMeun.insertAdjacentHTML(
-    "beforebegin",
-    `
-      <div id="${uiConfig.id.menuEntrance}">
-        <hr class="ss-line"/>
-        <div class="flex-col-center ss-menu">
-          <span style="font-size: 1rem;">巡天系统</span>
-          <span style="font-size: 0.8rem;">Sky-System v1.0</span>
-          <div style="margin-top: 10px; width: 100%;" class="flex-col flex-cross-axis-center">
-            <div id="${uiConfig.id.meunStatistics}" class="ss-menu-item">统计</div>
-            <div id="${uiConfig.id.menuScan}" class="ss-menu-item">扫描</div>
-            <div id="${uiConfig.id.menuDeploy}" class="ss-menu-item">部署</div>
-          </div>
-        </div>
-        <hr class="ss-line"/>
-      </div>`
-  );
-  // 点击 - 入口
-  const entrance = doc.getElementById(uiConfig.id.menuEntrance);
-  entrance.addEventListener("click", onClickMenuEntrance);
+//     // 注入菜单
+//     $(".MuiList-root").first().prepend(`
+//     <div id="${
+//       uiConfig.id.menuEntrance
+//   }">
+//       <hr class="ss-line"/>
+//       <div class="flex-col-center ss-menu">
+//         <span style="font-size: 1rem;">巡天系统</span>
+//         <span style="font-size: 0.8rem;">Sky-System v1.0</span>
+//         <div style="margin-top: 10px; width: 100%;" class="flex-col flex-cross-axis-center">
+//           <div id="${
+//       uiConfig.id.meunStatistics
+//   }" class="ss-menu-item">统计</div>
+//           <div id="${
+//       uiConfig.id.menuScan
+//   }" class="ss-menu-item">扫描</div>
+//           <div id="${
+//       uiConfig.id.menuDeploy
+//   }" class="ss-menu-item">部署</div>
+//         </div>
+//       </div>
+//       <hr class="ss-line"/>
+//     </div>`);
 
-  // 点击 - 统计
-  const statistics = doc.getElementById(uiConfig.id.meunStatistics);
-  statistics.addEventListener("click", onClickMenuStatistics);
+//     // 点击 - 入口
+//     const entrance = doc.getElementById(uiConfig.id.menuEntrance);
+//     entrance.addEventListener("click", onClickMenuEntrance);
 
-  // 点击 - 扫描
-  const menuScan = doc.getElementById(uiConfig.id.menuScan);
-  menuScan.addEventListener("click", onClickMenuScan);
+//     // 点击 - 统计
+//     const statistics = doc.getElementById(uiConfig.id.meunStatistics);
+//     statistics.addEventListener("click", onClickMenuStatistics);
 
-  // 点击 - 部署
-  const deploy = doc.getElementById(uiConfig.id.menuDeploy);
-  deploy.addEventListener("click", onClickMenuDeploy);
-}
+//     // 点击 - 扫描
+//     const menuScan = doc.getElementById(uiConfig.id.menuScan);
+//     menuScan.addEventListener("click", onClickMenuScan);
+
+//     // 点击 - 部署
+//     const deploy = doc.getElementById(uiConfig.id.menuDeploy);
+//     deploy.addEventListener("click", onClickMenuDeploy);
+// }
 
 /**
  * 检查节点是否存在
@@ -151,85 +154,71 @@ function createMenu() {
  * * @param {boolean} del
  */
 function checkNodeById(id) {
-  const target = doc.getElementById(id);
-  if (target && target !== null) {
-    return target;
-  }
-  return undefined;
+    const target = doc.getElementById(id);
+    if (target && target !== null) {
+        return target;
+    }
+    return undefined;
 }
 
 /**
  * 销毁节点
  */
 function deleteNodeById(id) {
-  const target = doc.getElementById(id);
-  if (target && target !== null) {
-    target.remove();
-  }
+    const target = doc.getElementById(id);
+    if (target && target !== null) {
+        target.remove();
+    }
 }
 
 /**
  * 入口点击事件
  * @param {HTMLElement} element
  */
-function onClickMenuEntrance(element) { }
+function onClickMenuEntrance(element) {}
 
 /**
  * 统计点击事件
  * @param {HTMLElement} element
  */
-function onClickMenuStatistics(element) { }
+function onClickMenuStatistics(element) {}
 
 /**
  * 扫描点击事件
  * @param {HTMLElement} element
  */
-function onClickMenuScan(element) {
+function onClickMenuScan(element) { // 再次点击，关闭
+    const target = checkNodeById(uiConfig.id.panelScan);
+    if (target) {
+        target.remove();
+        return;
+    }
 
-  // 再次点击，关闭
-  const target = checkNodeById(uiConfig.id.panelScan);
-  if (target) {
-    target.remove();
-    return;
-  }
+    // 添加
+    const closeId = uiConfig.id.panelScan + "-close";
+    root.insertAdjacentHTML('afterend', createPanel({
+        panelId: uiConfig.id.panelScan,
+        closeId: closeId,
+        title: "扫描",
+        panelWidth: 900,
+        panelHeight: 700
+    }));
 
-  // 添加
-  const closeId = uiConfig.id.panelScan + "-close";
-  root.insertAdjacentHTML('afterend', createPanel({
-    panelId: uiConfig.id.panelScan,
-    closeId: closeId,
-    title: "扫描",
-    panelWidth: 900,
-    panelHeight: 700,
-  }));
+    // 关闭事件
+    const closeBtn = doc.getElementById(closeId);
+    closeBtn.addEventListener("click", () => {
+        deleteNodeById(uiConfig.id.panelScan);
+    });
 
-  // 关闭事件
-  const closeBtn = doc.getElementById(closeId);
-  closeBtn.addEventListener("click", () => {
-    deleteNodeById(uiConfig.id.panelScan);
-  });
-
-  // // 触发扫描事件
-  // eventSend("scan");
-
-  const test = `
-        <script type="text/babel">
-          const TestPage = () => {
-            return <div style={{width: 100, height: 200, backgroundColor: 'red'}}>
-              testtest
-            </div>
-          };
-          ReactDOM.render(<TestPage />, document.getElementById("sky-panel-scan"));
-        </script>	
-      `;
-  doc.head.insertAdjacentHTML("beforeend", test);
+    // 触发扫描事件
+    eventSend("scan");
 }
 
 /**
  * 统计部署事件
  * @param {HTMLElement} element
  */
-function onClickMenuDeploy(element) { }
+function onClickMenuDeploy(element) {}
 
 /**
  * 创建界面标题栏
@@ -239,7 +228,7 @@ function onClickMenuDeploy(element) { }
  */
 function createTitleArea(closeId, title) {
 
-  return `
+    return `
       <div
         style="
           position: relative;
@@ -247,10 +236,14 @@ function createTitleArea(closeId, title) {
           height: 60px; 
           font-size: 20px;
           font-weight: bold;
-          color: ${theme.primary};
+          color: ${
+        theme.primary
+    };
           text-align: center;
           line-height: 60px;
-          border-bottom: 1px solid ${theme.primary};
+          border-bottom: 1px solid ${
+        theme.primary
+    };
         "
       >
         ${title}
@@ -262,7 +255,9 @@ function createTitleArea(closeId, title) {
            top: 0;
            right: 10px;
            font-size: 14px;
-           color: ${theme.primary};
+           color: ${
+        theme.primary
+    };
            cursor: pointer;
          "
        >X</div>
@@ -272,9 +267,15 @@ function createTitleArea(closeId, title) {
 /**
  * 创建界面
  */
-function createPanel({ panelId = '', closeId = '', title = '', panelWidth = 0, panelHeight = 0 }) {
+function createPanel({
+    panelId = '',
+    closeId = '',
+    title = '',
+    panelWidth = 0,
+    panelHeight = 0
+}) {
 
-  return `
+    return `
      <div
          id="${panelId}"
          style="
@@ -284,15 +285,27 @@ function createPanel({ panelId = '', closeId = '', title = '', panelWidth = 0, p
            height: ${panelHeight}px;
            top: 50%;
            left: 50%;
-           transform: translate(-${panelWidth / 2}px, -${panelHeight / 2}px);
-           border: 2px solid ${theme.primary};
+           transform: translate(-${
+        panelWidth / 2
+    }px, -${
+        panelHeight / 2
+    }px);
+           border: 2px solid ${
+        theme.primary
+    };
            border-radius: 8px;
-           background-color: ${theme.backgroundprimary};
-           box-shadow: 0 0 30px 4px ${theme.primary};
+           background-color: ${
+        theme.backgroundprimary
+    };
+           box-shadow: 0 0 30px 4px ${
+        theme.primary
+    };
          "
          class="flex-col"
        > 
-        ${createTitleArea(closeId, title)}
+        ${
+        createTitleArea(closeId, title)
+    }
       </div>
      `;
 }
@@ -305,26 +318,28 @@ function createPanel({ panelId = '', closeId = '', title = '', panelWidth = 0, p
  */
 function getScanResult(hostServer, exclude) {
 
-  const list = ns.scan(hostServer.hostname);
-  const serverList = list.map((item) => {
-    return ns.getServer(item);
-  });
+    const list = ns.scan(hostServer.hostname);
+    const serverList = list.map((item) => {
+        return ns.getServer(item);
+    });
 
-  const filterServerList = serverList.filter((item) => {
-    if (item.hostname === 'home' || item.hostname === exclude) return undefined;
-    return item;
-  });
+    const filterServerList = serverList.filter((item) => {
+        if (item.hostname === 'home' || item.hostname === exclude) 
+            return undefined;
+        
+        return item;
+    });
 
-  const resultList = [];
-  for (var item of filterServerList) {
-    resultList.push(item);
-    const result = getScanResult(item, hostServer.hostname);
-    for (var i of result) {
-      resultList.push(i);
+    const resultList = [];
+    for (var item of filterServerList) {
+        resultList.push(item);
+        const result = getScanResult(item, hostServer.hostname);
+        for (var i of result) {
+            resultList.push(i);
+        }
     }
-  }
 
-  return resultList;
+    return resultList;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -337,39 +352,38 @@ function getScanResult(hostServer, exclude) {
  * @param {any} data 事件数据
  */
 function eventSend(event, data) {
-  eventSystem.queue.push({
-    name: event,
-    data: data,
-  });
+    eventSystem.queue.push({name: event, data: data});
 }
 
 /**
  * 事件注册
  */
 function eventRegister() {
-  eventSystem.scheduler = {
-    scan: eventTriggerScan,
-  };
+    eventSystem.scheduler = {
+        scan: eventTriggerScan
+    };
 }
 
 /**
  * 事件循环
  */
-function eventLoop() {
-
-  // 遍历事件
-  while (eventSystem.queue.length > 0) {
-    // 查找对应的处理器
-    const event = eventSystem.queue.shift();
-    const scheduler = eventSystem.scheduler[event.name];
-    if (scheduler) {
-      log(`处理事件(${event.name})，信息(${event.data})`);
-      scheduler(event.data);
+function eventLoop() { // 遍历事件
+    while (eventSystem.queue.length > 0) { // 查找对应的处理器
+        const event = eventSystem.queue.shift();
+        const scheduler = eventSystem.scheduler[event.name];
+        if (scheduler) {
+            log(`处理事件(${
+                event.name
+            })，信息(${
+                event.data
+            })`);
+            scheduler(event.data);
+        } else {
+            logError(`事件(${
+                event.name
+            })找不到对应的处理器`);
+        }
     }
-    else {
-      logError(`事件(${event.name})找不到对应的处理器`);
-    }
-  }
 }
 
 /**
@@ -377,68 +391,98 @@ function eventLoop() {
  */
 function eventTriggerScan(data) {
 
-  const result = getScanResult(ns.getServer("home"));
-  const panel = doc.getElementById(uiConfig.id.panelScan);
-  if (!panel || panel === null) {
-    logError("扫描面板不存在，无法展示扫描结果");
-    return;
-  }
+    const result = getScanResult(ns.getServer("home"));
+    const panel = doc.getElementById(uiConfig.id.panelScan);
+    if (! panel || panel === null) {
+        logError("扫描面板不存在，无法展示扫描结果");
+        return;
+    }
 
-  // 已经存在则移除
-  const panelContentId = uiConfig.id.panelScan + "-content";
-  deleteNodeById(panelContentId);
+    // 已经存在则移除
+    const panelContentId = uiConfig.id.panelScan + "-content";
+    deleteNodeById(panelContentId);
 
-  /**
+    /**
    * 单个服务器Item
    * @type {(item: Server) => void}
    */
-  const createItem = (server) => {
+    const createItem = (server) => {
 
-    const canHack = canHackServer(server);
-    const org = server.purchasedByPlayer || server.hostname === 'home' ? "玩家" : server.organizationName;
+        const canHack = canHackServer(server);
+        const org = server.purchasedByPlayer || server.hostname === 'home' ? "玩家" : server.organizationName;
 
-    const createInfo = (value) => {
-      return `
+        const createInfo = (value) => {
+            return `
         <div
-          style="margin-top: 10px; font-size: 14px; color: ${theme.primary};"
+          style="margin-top: 10px; font-size: 14px; color: ${
+                theme.primary
+            };"
         >${value}</div>
       `;
-    };
+        };
 
-    const createButton = (title, callback) => {
-      return `
+        const createButton = (title, callback) => {
+            return `
         <div>${title}</div>
       `;
-    };
+        };
 
-    return `
-       <div id="${server.ip}">
-         <div style="margin: 10px 0; padding: 10px; border: 1px solid ${canHack ? theme.primary : theme.error};" class="flex-row">
+        return `
+       <div id="${
+            server.ip
+        }">
+         <div style="margin: 10px 0; padding: 10px; border: 1px solid ${
+            canHack ? theme.primary : theme.error
+        };" class="flex-row">
             <div style="margin-top: 2px;">${iconServer}</div>
             <div style="margin-left: 10px; flex-grow:1;">
-              <div style="font-size:14px; color:${theme.primary};" class="flex-row flex-cross-axis-center" >
-                <span style="font-size: 16px; font-weight: bold;">${server.hostname}</span>
+              <div style="font-size:14px; color:${
+            theme.primary
+        };" class="flex-row flex-cross-axis-center" >
+                <span style="font-size: 16px; font-weight: bold;">${
+            server.hostname
+        }</span>
                 <span style="margin-left: 8px;">势力: ${org}</span>
-                <span style="margin-left: 8px;">IP: ${server.ip}</span>
-                <div style="margin-left: 8px; padding: 2px 6px; background-color:${server.hasAdminRights ? theme.primary : theme.error}; border-radius: 4px; font-weight: bold; color: white;">
+                <span style="margin-left: 8px;">IP: ${
+            server.ip
+        }</span>
+                <div style="margin-left: 8px; padding: 2px 6px; background-color:${
+            server.hasAdminRights ? theme.primary : theme.error
+        }; border-radius: 4px; font-weight: bold; color: white;">
                   Root
                 </div>
-                <div style="margin-left: 8px; padding: 2px 6px; background-color:${server.backdoorInstalled ? theme.primary : theme.error}; border-radius: 4px; font-weight: bold; color: white;">
+                <div style="margin-left: 8px; padding: 2px 6px; background-color:${
+            server.backdoorInstalled ? theme.primary : theme.error
+        }; border-radius: 4px; font-weight: bold; color: white;">
                   Backdoor
                 </div>
               </div>
-              ${createInfo(`端口: ${server.numOpenPortsRequired}　RAM: ${server.maxRam} GB　所需Hack: ${server.requiredHackingSkill}　最大金额: ${formatMoney(server.moneyMax)}　最低安全: ${server.minDifficulty}`)}
+              ${
+            createInfo(`端口: ${
+                server.numOpenPortsRequired
+            }　RAM: ${
+                server.maxRam
+            } GB　所需Hack: ${
+                server.requiredHackingSkill
+            }　最大金额: ${
+                formatMoney(server.moneyMax)
+            }　最低安全: ${
+                server.minDifficulty
+            }`)
+        }
             </div>
          </div>
        </div>
      `;
-  };
+    };
 
-  panel.insertAdjacentHTML("beforeend", `
+    panel.insertAdjacentHTML("beforeend", `
      <div id="${panelContentId}" style="flex-grow:1; overflow-y: scroll; padding: 20px">
-       ${result.map((item) => {
-         return createItem(item);
-       }).join("")}
+       ${
+        result.map((item) => {
+            return createItem(item);
+        }).join("")
+    }
      </div>
    `);
 }
@@ -449,64 +493,76 @@ function eventTriggerScan(data) {
 
 // 打印错误日志
 function log(msg) {
-  ns.print(`【Info】：${msg}`);
+    ns.print(`【Info】：${msg}`);
 }
 
 // 打印错误日志
 function logError(msg) {
-  ns.print(`【Error】：${msg}`);
+    ns.print(`【Error】：${msg}`);
 }
 
 // 金额格式化
 function formatMoney(money) {
 
-  if (money >= 1000000000000) {
-    return `${(money / 1000000000000).toFixed(2)} t`;
-  }
-  else if (money >= 1000000000) {
-    return `${(money / 1000000000).toFixed(2)} b`;
-  }
-  else if (money >= 1000000) {
-    return `${(money / 1000000).toFixed(2)} m`;
-  }
-  else if (money >= 1000) {
-    return `${(money / 1000).toFixed(2)} k`;
-  }
-  else {
-    return `${money}`;
-  }
+    if (money >= 1000000000000) {
+        return `${
+            (money / 1000000000000).toFixed(2)
+        } t`;
+    } else if (money >= 1000000000) {
+        return `${
+            (money / 1000000000).toFixed(2)
+        } b`;
+    } else if (money >= 1000000) {
+        return `${
+            (money / 1000000).toFixed(2)
+        } m`;
+    } else if (money >= 1000) {
+        return `${
+            (money / 1000).toFixed(2)
+        } k`;
+    } else {
+        return `${money}`;
+    }
 }
 
 // 检查当前破解工具个数
 function getCurrentPortTools() {
-  var tools = 0;
-  if (ns.fileExists("BruteSSH.exe", "home")) tools++;
-  if (ns.fileExists("FTPCrack.exe", "home")) tools++;
-  if (ns.fileExists("relaySMTP.exe", "home")) tools++;
-  if (ns.fileExists("HTTPWorm.exe", "home")) tools++;
-  if (ns.fileExists("SQLInject.exe", "home")) tools++;
-  return tools;
+    var tools = 0;
+    if (ns.fileExists("BruteSSH.exe", "home")) 
+        tools++;
+    
+    if (ns.fileExists("FTPCrack.exe", "home")) 
+        tools++;
+    
+    if (ns.fileExists("relaySMTP.exe", "home")) 
+        tools++;
+    
+    if (ns.fileExists("HTTPWorm.exe", "home")) 
+        tools++;
+    
+    if (ns.fileExists("SQLInject.exe", "home")) 
+        tools++;
+    
+    return tools;
 }
 
 /** 
  * 服务器是否可以Hack
  * @param {Server} server 
  **/
-function canHackServer(server) {
+function canHackServer(server) { // 检查hack等级
+    const hackLvl = ns.getHackingLevel();
+    const targetHackLvl = server.requiredHackingSkill;
+    if (targetHackLvl > hackLvl) {
+        return false;
+    }
 
-  // 检查hack等级
-  const hackLvl = ns.getHackingLevel();
-  const targetHackLvl = server.requiredHackingSkill;
-  if (targetHackLvl > hackLvl) {
-    return false;
-  }
+    // 检查端口需求
+    const tools = getCurrentPortTools(ns);
+    const targetPorts = server.numOpenPortsRequired;
+    if (targetPorts > tools) {
+        return false;
+    }
 
-  // 检查端口需求
-  const tools = getCurrentPortTools(ns);
-  const targetPorts = server.numOpenPortsRequired;
-  if (targetPorts > tools) {
-    return false;
-  }
-
-  return true;
+    return true;
 }
