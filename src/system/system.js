@@ -96,93 +96,6 @@ export async function main(netScript) {
     }
 }
 
-// ------------------------------------------------------------------------------------------
-// ------------------------------------------ 界面 ------------------------------------------
-// ------------------------------------------------------------------------------------------
-
-// /**
-//  * 创建左侧菜单入口
-//  */
-// function createMenu() { // 检查入口是否存在，存在则销毁
-
-//     $(`#${uiConfig.id.menuEntrance}`).remove();
-
-//     // 注入菜单
-//     $(".MuiList-root").first().prepend(`
-//     <div id="${
-//       uiConfig.id.menuEntrance
-//   }">
-//       <hr class="ss-line"/>
-//       <div class="flex-col-center ss-menu">
-//         <span style="font-size: 1rem;">巡天系统</span>
-//         <span style="font-size: 0.8rem;">Sky-System v1.0</span>
-//         <div style="margin-top: 10px; width: 100%;" class="flex-col flex-cross-axis-center">
-//           <div id="${
-//       uiConfig.id.meunStatistics
-//   }" class="ss-menu-item">统计</div>
-//           <div id="${
-//       uiConfig.id.menuScan
-//   }" class="ss-menu-item">扫描</div>
-//           <div id="${
-//       uiConfig.id.menuDeploy
-//   }" class="ss-menu-item">部署</div>
-//         </div>
-//       </div>
-//       <hr class="ss-line"/>
-//     </div>`);
-
-//     // 点击 - 入口
-//     const entrance = doc.getElementById(uiConfig.id.menuEntrance);
-//     entrance.addEventListener("click", onClickMenuEntrance);
-
-//     // 点击 - 统计
-//     const statistics = doc.getElementById(uiConfig.id.meunStatistics);
-//     statistics.addEventListener("click", onClickMenuStatistics);
-
-//     // 点击 - 扫描
-//     const menuScan = doc.getElementById(uiConfig.id.menuScan);
-//     menuScan.addEventListener("click", onClickMenuScan);
-
-//     // 点击 - 部署
-//     const deploy = doc.getElementById(uiConfig.id.menuDeploy);
-//     deploy.addEventListener("click", onClickMenuDeploy);
-// }
-
-/**
- * 检查节点是否存在
- * @param {string} id
- * * @param {boolean} del
- */
-function checkNodeById(id) {
-    const target = doc.getElementById(id);
-    if (target && target !== null) {
-        return target;
-    }
-    return undefined;
-}
-
-/**
- * 销毁节点
- */
-function deleteNodeById(id) {
-    const target = doc.getElementById(id);
-    if (target && target !== null) {
-        target.remove();
-    }
-}
-
-/**
- * 入口点击事件
- * @param {HTMLElement} element
- */
-function onClickMenuEntrance(element) {}
-
-/**
- * 统计点击事件
- * @param {HTMLElement} element
- */
-function onClickMenuStatistics(element) {}
-
 /**
  * 扫描点击事件
  * @param {HTMLElement} element
@@ -214,101 +127,6 @@ function onClickMenuScan(element) { // 再次点击，关闭
     eventSend("scan");
 }
 
-/**
- * 统计部署事件
- * @param {HTMLElement} element
- */
-function onClickMenuDeploy(element) {}
-
-/**
- * 创建界面标题栏
- * 
- * @param {string} closeId
- * @param {string} title
- */
-function createTitleArea(closeId, title) {
-
-    return `
-      <div
-        style="
-          position: relative;
-          width: 100%;
-          height: 60px; 
-          font-size: 20px;
-          font-weight: bold;
-          color: ${
-        theme.primary
-    };
-          text-align: center;
-          line-height: 60px;
-          border-bottom: 1px solid ${
-        theme.primary
-    };
-        "
-      >
-        ${title}
-        <div
-         id="${closeId}"
-         style="
-           position: absolute;
-           padding: 0 20px;
-           top: 0;
-           right: 10px;
-           font-size: 14px;
-           color: ${
-        theme.primary
-    };
-           cursor: pointer;
-         "
-       >X</div>
-      </div>
-    `;
-}
-/**
- * 创建界面
- */
-function createPanel({
-    panelId = '',
-    closeId = '',
-    title = '',
-    panelWidth = 0,
-    panelHeight = 0
-}) {
-
-    return `
-     <div
-         id="${panelId}"
-         style="
-           position: fixed;
-           z-index: 9000;
-           width: ${panelWidth}px;
-           height: ${panelHeight}px;
-           top: 50%;
-           left: 50%;
-           transform: translate(-${
-        panelWidth / 2
-    }px, -${
-        panelHeight / 2
-    }px);
-           border: 2px solid ${
-        theme.primary
-    };
-           border-radius: 8px;
-           background-color: ${
-        theme.backgroundprimary
-    };
-           box-shadow: 0 0 30px 4px ${
-        theme.primary
-    };
-         "
-         class="flex-col"
-       > 
-        ${
-        createTitleArea(closeId, title)
-    }
-      </div>
-     `;
-}
 
 /**
  * 获取扫描数据
@@ -501,28 +319,25 @@ function logError(msg) {
     ns.print(`【Error】：${msg}`);
 }
 
-// 金额格式化
-function formatMoney(money) {
-
-    if (money >= 1000000000000) {
-        return `${
-            (money / 1000000000000).toFixed(2)
-        } t`;
-    } else if (money >= 1000000000) {
-        return `${
-            (money / 1000000000).toFixed(2)
-        } b`;
-    } else if (money >= 1000000) {
-        return `${
-            (money / 1000000).toFixed(2)
-        } m`;
-    } else if (money >= 1000) {
-        return `${
-            (money / 1000).toFixed(2)
-        } k`;
-    } else {
-        return `${money}`;
-    }
+/**
+ * 金额格式化
+ */
+ function formatMoney(money) {
+	if (money >= 1e12) {
+		return `${(money / 1e12).toFixed(2)} t`;
+	}
+	else if (money >= 1e9) {
+		return `${(money / 1e9).toFixed(2)} b`;
+	}
+	else if (money >= 1e6) {
+		return `${(money / 1e6).toFixed(2)} m`;
+	}
+	else if (money >= 1000) {
+		return `${(money / 1000).toFixed(2)} k`;
+	}
+	else {
+		return `${money}`;
+	}
 }
 
 // 检查当前破解工具个数

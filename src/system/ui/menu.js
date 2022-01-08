@@ -55,7 +55,13 @@ function onTapMenuStatistics() {
 // 事件 - 点击扫描菜单
 function onTapMenuScan()  {
 
-    window.alert("点击产生");
+  const target = $(`#${uiConfig.id.panelScan}`);
+  if (target) {
+      target.remove();
+      return;
+  }
+
+  createPanelScan(uiConfig.id.panelScan);
 }
 
 // 事件 - 点击部署菜单
