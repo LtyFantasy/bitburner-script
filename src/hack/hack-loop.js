@@ -112,16 +112,16 @@ async function hackEventLoop(ns, name, delayInterval, hackScript, growScript, we
 		// 计算Weaken所需线程
 		var weakenThread = 0;
 		if (needWeaken) {
-			weakenThread = Math.floor((security - securityThreshold) / analyze.weakenValue);
+			weakenThread = Math.floor((security - securityMin) / analyze.weakenValue);
 		}
 
 		// 计算Grow所需线程
 		var growThread = 0;
 		var moneyTarget = money;
 		if (needGrow) {
-			ns.print(`【${count}】目标金额增长比例(${(moneyThreshold / money).toFixed(3)})`);
-			growThread = Math.floor(ns.growthAnalyze(server.hostname, moneyThreshold / money));
-			moneyTarget = moneyThreshold;
+			ns.print(`【${count}】目标金额增长比例(${(moneyMax / money).toFixed(3)})`);
+			growThread = Math.floor(ns.growthAnalyze(server.hostname, moneyMax / money));
+			moneyTarget = moneyMax;
 		}
 		ns.print(`【${count}】Hack金额目标(${formatMoney(moneyTarget)})`);
 
