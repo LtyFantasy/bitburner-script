@@ -1,11 +1,17 @@
+import Global from "/system/data/global";
+
 /**
  * 创建界面
- * @param {UserInterfaceTheme} theme
  */
-export function createPanel(
-  theme,
-  { panelId = "", closeId = "", title = "", panelWidth = 0, panelHeight = 0 }
-) {
+export function createPanel({
+  panelId = "",
+  closeId = "",
+  title = "",
+  panelWidth = 0,
+  panelHeight = 0,
+}) {
+
+  let theme = Global.theme;
   return `
    <div
        id="${panelId}"
@@ -24,7 +30,7 @@ export function createPanel(
        "
        class="flex-col"
      > 
-      ${createTitleArea(theme, closeId, title)}
+      ${createTitleArea(closeId, title)}
     </div>
    `;
 }
@@ -32,11 +38,12 @@ export function createPanel(
 /**
  * 创建界面标题栏
  *
- * @param {UserInterfaceTheme} theme
  * @param {string} closeId
  * @param {string} title
  */
-function createTitleArea(theme, closeId, title) {
+function createTitleArea(closeId, title) {
+
+  let theme = Global.theme;
   return `
     <div
       style="

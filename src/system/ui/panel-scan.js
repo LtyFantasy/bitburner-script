@@ -1,24 +1,29 @@
-import { createPanel } from "/system/ui/panel-common.js";
+import Global from "/system/data/global";
+import { createPanel } from "/system/ui/panel-common";
 /**
  * 创建扫描面板
- * 
- * @param {UserInterfaceTheme} theme
+ *
  * @param {string} id
  */
-export default function createPanelScan(theme, id) {
-
-    // 添加
-    const closeId = id + "-close";
-    $("#root").after(createPanel(theme ,{
+export function createPanelScan(id) {
+  // 添加
+  const closeId = id + "-close";
+  $("#root").after(
+    createPanel({
       panelId: id,
       closeId: closeId,
       title: "扫描",
       panelWidth: 900,
-      panelHeight: 700
-  }));
+      panelHeight: 700,
+    })
+  );
 
-    // 关闭事件
-    $(`#${closeId}`).on("click", function () {
-      $(`#${id}`).remove();
-    });
+  // 关闭事件
+  $(`#${closeId}`).on("click", function () {
+    $(`#${id}`).remove();
+  });
+
+  // 触发扫描
+  Global.sendEvent("scan");
 }
+

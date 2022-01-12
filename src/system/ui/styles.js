@@ -1,12 +1,12 @@
 
+import Global from "/system/data/global";
+
 /**
  * 注入全局样式
- * 
- * @param {Document} doc
- * @param {UserInterfaceTheme} theme 
  */
-export function injectStyle(doc, theme) {
+export function injectStyle() {
 
+    const {doc, theme} = Global;
     const style = `
           <style type="text/css" id="sky-style">
             .flex-row {display: flex;flex-wrap: nowrap;flex-direction: row;}

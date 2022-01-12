@@ -1,8 +1,8 @@
-import createPanelScan from "/system/ui/panel-scan";
-
+import Global from "/system/data/global";
+import { createPanelScan } from "/system/ui/panel-scan";
 
 // UI配置
-const uiConfig = {
+export const uiConfig = {
     id: {
         // 菜单入口
         menuEntrance: "sky-menu-entrance",
@@ -19,9 +19,8 @@ const uiConfig = {
 
 /**
  * 创建系统入口菜单
- * @param {UserInterfaceTheme} theme 
  */
-export function createMenu(theme) {
+export function createMenu() {
 
     $(`#${uiConfig.id.menuEntrance}`).remove();
 
@@ -56,11 +55,12 @@ function onTapMenuStatistics() {
 function onTapMenuScan()  {
 
   const target = $(`#${uiConfig.id.panelScan}`);
-  if (target) {
+  if (target.length > 0) {
       target.remove();
       return;
   }
 
+  // 触发扫描
   createPanelScan(uiConfig.id.panelScan);
 }
 
