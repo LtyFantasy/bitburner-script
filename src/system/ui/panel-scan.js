@@ -13,7 +13,7 @@ export function createPanelScan(id) {
       panelId: id,
       closeId: closeId,
       title: "扫描",
-      panelWidth: 900,
+      panelWidth: 800,
       panelHeight: 700,
     })
   );

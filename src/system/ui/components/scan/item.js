@@ -7,10 +7,9 @@ import Format from "/system/utils/format";
  * @param {Server} server
  * @param {boolean} canHack
  */
- export function createScanItem(server, canHack) {
-
+export function createScanItem(server, canHack) {
+  
   const { theme } = Global;
-
   var org = server.organizationName;
   if (server.purchasedByPlayer || server.hostname === "home") {
     org = "玩家";
@@ -40,12 +39,27 @@ import Format from "/system/utils/format";
   };
 
   // 按钮
-  const createButton = (title, callback) => {
-    return `<div>${title}</div>`;
+  const createButton = (title, name) => {
+    return `
+      <div 
+        style="
+          margin: 0 10px; 
+          padding: 4px 8px;
+          cursor: pointer; 
+          font-size: 14px; 
+          color: ${theme.primary}; 
+          border-radius: 2px;
+          border: 1px solid ${theme.primary};
+        "
+        name="${name}"
+      >
+        ${title}
+      </div>
+    `;
   };
 
   // 第一行，服务器名
-  const firstRowUI = `
+  const row1UI = `
   <div 
     style="font-size:14px; color:${theme.primary};" 
     class="flex-row flex-cross-axis-center" 
@@ -68,6 +82,15 @@ import Format from "/system/utils/format";
     最低安全: ${server.minDifficulty}
   `);
 
+  // 第三行，按钮
+  const row3UI = `
+    <div style="margin-top: 20px;" class="flex-row flex-main-axis-center">
+      ${createButton("连接")}
+      ${createButton("查看")}
+      ${createButton("Hack")}
+    </div>
+  `;
+
   return `
     <div id="${server.ip}">
       <div 
@@ -79,8 +102,9 @@ import Format from "/system/utils/format";
       >
         <div style="margin-top: 2px;">${Icons.server}</div>
           <div style="margin-left: 10px; flex-grow:1;">
-            ${firstRowUI}
+            ${row1UI}
             ${row2UI}
+            ${row3UI}
         </div>
       </div>
     </div>
